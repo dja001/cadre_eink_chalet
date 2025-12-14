@@ -1,0 +1,121 @@
+
+# Configuration Examples
+
+## schedule.conf
+
+Create this file at `/home/pi/eink_scheduler/schedule.conf`:
+
+```
+# Schedule configuration for e-ink display
+# Format: day_of_week hour_start hour_end function_name
+# day_of_week: 0=Monday, 1=Tuesday, ..., 6=Sunday
+# hours: 0-23 (24-hour format)
+# Lines starting with # are comments
+
+# Monday 9am-12pm: function1
+0 9 12 function1
+
+# Wednesday 14pm-17pm: function2
+2 14 17 function2
+
+# Friday 18pm-21pm: function3
+4 18 21 function3
+
+# Saturday all day: function1
+5 0 24 function1
+```
+
+## Installation Instructions
+
+### 1. Create directory structure
+```bash
+mkdir -p /home/pi/eink_scheduler
+cd /home/pi/eink_scheduler
+```
+
+### 2. Create the files
+- Copy the Python scheduler code to `/home/pi/eink_scheduler/scheduler.py`
+- Create the configuration file at `/home/pi/eink_scheduler/schedule.conf`
+- Make the Python script executable:
+```bash
+chmod +x /home/pi/eink_scheduler/scheduler.py
+```
+
+### 3. Install the systemd service
+```bash
+sudo cp eink-scheduler.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable eink-scheduler.service
+```
+
+### 4. Start the service
+```bash
+sudo systemctl start eink-scheduler.service
+```
+
+### 5. Check status
+```bash
+sudo systemctl status eink-scheduler.service
+```
+
+### 6. View logs
+```bash
+# Real-time logs
+sudo journalctl -u eink-scheduler.service -f
+
+# All logs
+sudo journalctl -u eink-scheduler.service
+
+# Error log file
+cat /home/pi/eink_scheduler/error.log
+```
+
+## Service Management Commands
+
+```bash
+# Start the service
+sudo systemctl start eink-scheduler.service
+
+# Stop the service
+sudo systemctl stop eink-scheduler.service
+
+# Restart the service
+sudo systemctl restart eink-scheduler.service
+
+# Check if service is running
+sudo systemctl status eink-scheduler.service
+
+# Disable auto-start on boot
+sudo systemctl disable eink-scheduler.service
+
+# Enable auto-start on boot
+sudo systemctl enable eink-scheduler.service
+```
+
+## Testing Without Systemd
+
+Before setting up the service, test the scheduler manually:
+
+```bash
+cd /home/pi/eink_scheduler
+python3 scheduler.py
+```
+
+Press Ctrl+C to stop.
+
+## Troubleshooting
+
+**Service won't start:**
+- Check permissions: `ls -l /home/pi/eink_scheduler/`
+- Check Python path: `which python3`
+- View errors: `sudo journalctl -u eink-scheduler.service -n 50`
+
+**Configuration errors:**
+- Check config file syntax
+- Verify function names match FUNCTION_MAP in scheduler.py
+- Check for overlapping schedules
+
+**Display not updating:**
+- Verify your e-ink driver code is correctly integrated
+- Check error.log for issues
+- Test display functions individually

@@ -52,7 +52,7 @@ def calculate_text_height(text, font, max_width, margin=20):
 
     return text_height, wrapped_text
 
-def create_eink_image(comic_data, width=1200, height=1600, output_path="xkcd_eink.png"):
+def create_eink_image(comic_data, width=1200, height=1600, output_path="figures/xkcd_eink.png"):
     """
     Create an e-ink formatted image with XKCD comic and legend.
 
@@ -138,10 +138,15 @@ def create_eink_image(comic_data, width=1200, height=1600, output_path="xkcd_ein
     canvas.save(output_path)
     print(f"Saved e-ink image to {output_path}")
     print(f"Comic: {comic_data['title']} (#{comic_data['num']})")
-    return canvas
 
-# Main execution - fetch random comic for testing
-if __name__ == "__main__":
+    return output_path
+
+def xkcd_todays_image():
+    comic_data = fetch_xkcd()
+    return create_eink_image(comic_data, output_path='figures/todays_xkcd.png')
+
+def xkcd_random_image():
+
     # Get latest comic number
     latest = fetch_xkcd()
     latest_num = latest['num']
@@ -151,10 +156,11 @@ if __name__ == "__main__":
     print(f"Fetching random XKCD #{random_num}...")
 
     comic_data = fetch_xkcd(random_num)
+    return create_eink_image(comic_data, output_path='figures/random_xkcd.png')
 
-    # Create e-ink formatted image
-    create_eink_image(comic_data)
 
-    # To fetch today's comic instead, use:
-    # comic_data = fetch_xkcd()
-    # create_eink_image(comic_data)
+# Main execution - fetch random comic for testing
+if __name__ == "__main__":
+    #xkcd_todays_image()
+    xkcd_random_image()
+

@@ -2,8 +2,31 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 
-def create_todo_display(todo_list, npix_h=1200, npix_v=1600, bg_image=None,
-                        font_path=None, padding=40):
+def get_todo_from_dropbox():
+
+    import os
+    import dropbox
+
+    access_token = os.getenv('DROPBOX_API_TOKEN')
+    if access_token is None:
+        raise ValueError('Pleas load dropbox api token in env before running this script')
+    
+    dbx = dropbox.Dropbox(access_token)
+    
+    metadata, res = dbx.files_download("/listes/fermeture_du_chalet.txt")
+    #print(metadata)
+    #print(res)
+    #print(res.content)
+    #f.write(res.content)
+
+    text = res.content.decode("utf-8")
+    lines = text.splitlines()
+
+    return lines
+
+
+def create_todo_display_image(todo_list, npix_h=1200, npix_v=1600, bg_image=None,
+                              font_path=None, padding=40, output_name='figures/todo.png'):
     """
     Create an e-ink display image with a todo list.
 
@@ -191,7 +214,9 @@ def create_todo_display(todo_list, npix_h=1200, npix_v=1600, bg_image=None,
         # Update column y position
         col_y_positions[col] = y + item_height + item_spacing
 
-    return img
+    img.save(output_name)
+
+    return output_name
 
 
 def wrap_text(text, font, max_width, draw):
@@ -218,23 +243,36 @@ def wrap_text(text, font, max_width, draw):
     return lines if lines else [text]
 
 
+def todo_fermeture_chalet():
+
+    todos = get_todo_from_dropbox()
+    return create_todo_display_image(todos)
+
+    
+
 
 # Example usage
 if __name__ == "__main__":
+
+
+
+    todo_fermeture_chalet()
+
+
     # Example todo list
-    todos = [
-        "Buy groceries",
-        "Call dentist",
-        "Finish project report",
-        "Exercise for 30 minutes",
-        "Read chapter 5",
-        "Pay electricity bill",
-        "Pay electricity bill",
-        "New",
-        "another",
-        "yet another",
-        "Pay ptl"
-    ]
+    #todos = [
+    #    "Buy groceries",
+    #    "Call dentist",
+    #    "Finish project report",
+    #    "Exercise for 30 minutes",
+    #    "Read chapter 5",
+    #    "Pay electricity bill",
+    #    "Pay electricity bill",
+    #    "New",
+    #    "another",
+    #    "yet another",
+    #    "Pay ptl"
+    #]
     #todos = [
     #    "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     #    "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
@@ -269,10 +307,8 @@ if __name__ == "__main__":
     #]
     
     # Create display without background
-    img = create_todo_display(todos)
-    img.save("todo_display.png")
-    print("Display created: todo_display.png")
+    #img = create_todo_display_image(todos)
     
     # Example with background image (uncomment if you have a background)
-    # img_with_bg = create_todo_display(todos, bg_image="background.jpg")
+    # img_with_bg = create_todo_display_image(todos, bg_image="background.jpg")
     # img_with_bg.save("todo_display_with_bg.png")

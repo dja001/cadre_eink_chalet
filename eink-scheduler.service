@@ -1,0 +1,31 @@
+# /etc/systemd/system/eink-scheduler.service
+#
+# Systemd service for E-ink Display Scheduler
+# This provides automatic startup and restart on crashes
+
+[Unit]
+Description=E-ink Display Scheduler
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/eink_scheduler
+
+# Path to your Python script
+ExecStart=/usr/bin/python3 /home/pi/eink_scheduler/scheduler.py
+
+# Restart policy - automatically restart if it crashes
+Restart=always
+RestartSec=10
+
+# Standard output and error logging
+StandardOutput=journal
+StandardError=journal
+
+# Environment variables (if needed)
+# Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
