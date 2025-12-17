@@ -15,6 +15,7 @@ import sys
 from xkcd_image import xkcd_todays_image
 from xkcd_image import xkcd_random_image
 from todo_image import todo_fermeture_chalet
+from random_image_from_dropbox import random_image_from_dropbox
 
 # ============================================================================
 # CONFIGURATION - Modify these paths and settings
@@ -46,7 +47,7 @@ def function3() -> str:
     return "/path/to/generated/image3.png"
 
 # List of available display functions for random selection
-AVAILABLE_DISPLAY_FUNCTIONS = [xkcd_todays_image, xkcd_random_image, todo_fermeture_chalet]
+AVAILABLE_DISPLAY_FUNCTIONS = [xkcd_todays_image, xkcd_random_image, todo_fermeture_chalet, random_image_from_dropbox]
 
 # Dictionary mapping function names to actual functions
 FUNCTION_MAP = {
@@ -62,6 +63,19 @@ FUNCTION_MAP = {
 def eink_update(image_path: str) -> None:
     """Update e-ink display with given image"""
     logging.info(f"Updating e-ink display with: {image_path}")
+
+    import os
+    import shutil
+
+    src = image_path
+    dst = 'figures/current_image.png'
+
+    if os.path.isfile(dst):
+        os.remove(dst)
+
+    shutil.copyfile(src, dst)
+
+
     # Replace with your actual e-ink update code
     # Example: epd.display(epd.getbuffer(Image.open(image_path)))
     pass
@@ -120,6 +134,10 @@ class EinkScheduler:
         
         # Configure root logger
         logging.basicConfig(level=logging.DEBUG, handlers=[console_handler, error_handler])
+
+        # Silence noisy libraries
+        for noisy in ("PIL", "PIL.Image", "urllib3", "matplotlib"):
+            logging.getLogger(noisy).setLevel(logging.WARNING)
         
     def load_config(self) -> bool:
         """Load and validate schedule configuration"""
