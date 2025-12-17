@@ -16,6 +16,7 @@ from xkcd_image import xkcd_todays_image
 from xkcd_image import xkcd_random_image
 from todo_image import todo_fermeture_chalet
 from random_image_from_dropbox import random_image_from_dropbox
+from nhl_classification import make_nhl_standings_image
 
 # ============================================================================
 # CONFIGURATION - Modify these paths and settings
@@ -33,27 +34,25 @@ CHECK_INTERVAL_SECONDS = 30  # How often to check if we need to update
 # DISPLAY FUNCTIONS - Replace these with your actual functions
 # ============================================================================
 
-def function1() -> str:
-    """Example display function - replace with your actual implementation"""
-    # Your code to generate image
-    return "/path/to/generated/image1.png"
-
-def function2() -> str:
-    """Example display function - replace with your actual implementation"""
-    return "/path/to/generated/image2.png"
-
-def function3() -> str:
-    """Example display function - replace with your actual implementation"""
-    return "/path/to/generated/image3.png"
+def shutdown_display() -> str:
+    """Function that does nothing but output shutdown instruction"""
+    return "shutdown"
 
 # List of available display functions for random selection
-AVAILABLE_DISPLAY_FUNCTIONS = [xkcd_todays_image, xkcd_random_image, todo_fermeture_chalet, random_image_from_dropbox]
+DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY = [xkcd_random_image, 
+                                     random_image_from_dropbox, 
+                                     make_nhl_standings_image
+                                    ]
 
 # Dictionary mapping function names to actual functions
+# These are necessary for functions to be scheduled
 FUNCTION_MAP = {
+    "shutdown_display": shutdown_display,
     "xkcd_todays_image": xkcd_todays_image,
     "xkcd_random_image": xkcd_random_image,
     "todo_fermeture_chalet": todo_fermeture_chalet,
+    "random_image_from_dropbox": random_image_from_dropbox,
+    "make_nhl_standings_image": make_nhl_standings_image
 }
 
 # ============================================================================
@@ -91,24 +90,6 @@ def eink_clear() -> None:
 # SCHEDULER CODE
 # ============================================================================
 
-class Schedule:
-    """Represents a scheduled display period"""
-    def __init__(self, day_of_week: int, hour_start: int, hour_end: int, function_name: str):
-        self.day_of_week = day_of_week  # 0=Monday, 6=Sunday
-        self.hour_start = hour_start
-        self.hour_end = hour_end
-        self.function_name = function_name
-        
-    def is_active(self, dt: datetime) -> bool:
-        """Check if this schedule is active at given datetime"""
-        return (dt.weekday() == self.day_of_week and 
-                self.hour_start <= dt.hour < self.hour_end)
-    
-    def __repr__(self):
-        days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-        return f"Schedule({days[self.day_of_week]} {self.hour_start:02d}:00-{self.hour_end:02d}:00 -> {self.function_name})"
-
-
 class EinkScheduler:
     """Main scheduler class"""
     
@@ -140,80 +121,17 @@ class EinkScheduler:
             logging.getLogger(noisy).setLevel(logging.WARNING)
         
     def load_config(self) -> bool:
-        """Load and validate schedule configuration"""
-        try:
-            logging.info(f"Loading configuration from {CONFIG_FILE}")
-            config_path = Path(CONFIG_FILE)
-            
-            if not config_path.exists():
-                logging.error(f"Configuration file not found: {CONFIG_FILE}")
-                return False
-            
-            schedules = []
-            with open(config_path, 'r') as f:
-                for line_num, line in enumerate(f, 1):
-                    line = line.strip()
-                    if not line or line.startswith('#'):
-                        continue
-                    
-                    parts = line.split()
-                    if len(parts) != 4:
-                        logging.error(f"Invalid config line {line_num}: {line}")
-                        return False
-                    
-                    day_str, hour_start_str, hour_end_str, func_name = parts
-                    
-                    try:
-                        day = int(day_str)
-                        hour_start = int(hour_start_str)
-                        hour_end = int(hour_end_str)
-                    except ValueError:
-                        logging.error(f"Invalid numbers in config line {line_num}: {line}")
-                        return False
-                    
-                    if not (0 <= day <= 6):
-                        logging.error(f"Invalid day_of_week in line {line_num}: {day} (must be 0-6)")
-                        return False
-                    
-                    if not (0 <= hour_start < 24 and 0 <= hour_end <= 24):
-                        logging.error(f"Invalid hours in line {line_num}: {hour_start}-{hour_end}")
-                        return False
-                    
-                    if hour_start >= hour_end:
-                        logging.error(f"hour_start must be < hour_end in line {line_num}")
-                        return False
-                    
-                    if func_name not in FUNCTION_MAP:
-                        logging.error(f"Unknown function in line {line_num}: {func_name}")
-                        return False
-                    
-                    schedules.append(Schedule(day, hour_start, hour_end, func_name))
-            
-            # Check for overlaps
-            if not self.check_overlaps(schedules):
-                return False
-            
+        """load pre-programmed schedule times"""
+        from config_file_handler import load_config
+
+        success, schedules = load_config('schedule.conf', FUNCTION_MAP)
+        if success:
+            logging.info("\n Configuration loaded successfully!")
+            logging.info(f"Total schedules: {len(schedules)}")
             self.schedules = schedules
-            logging.info(f"Loaded {len(self.schedules)} schedules successfully")
-            for sched in self.schedules:
-                logging.debug(f"  {sched}")
-            
-            return True
-            
-        except Exception as e:
-            logging.error(f"Error loading configuration: {e}")
-            return False
-    
-    def check_overlaps(self, schedules: List[Schedule]) -> bool:
-        """Check for overlapping schedules"""
-        for i, s1 in enumerate(schedules):
-            for s2 in schedules[i+1:]:
-                if s1.day_of_week == s2.day_of_week:
-                    # Check if hours overlap
-                    if not (s1.hour_end <= s2.hour_start or s2.hour_end <= s1.hour_start):
-                        logging.error(f"Overlapping schedules detected: {s1} and {s2}")
-                        return False
-        return True
+        else:
+            logging.error("Failed to load configuration. Exiting.")
+            sys.exit(1)
     
     def get_active_schedule(self, dt: datetime) -> Optional[Schedule]:
         """Get the active schedule for given datetime"""
@@ -237,8 +155,8 @@ class EinkScheduler:
         """Run a random display function, retry if it fails"""
         attempted = set()
         
-        while len(attempted) < len(AVAILABLE_DISPLAY_FUNCTIONS):
-            func = random.choice(AVAILABLE_DISPLAY_FUNCTIONS)
+        while len(attempted) < len(DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY):
+            func = random.choice(DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY)
             
             if func in attempted:
                 continue
@@ -284,11 +202,7 @@ class EinkScheduler:
         """Main scheduler loop"""
         logging.info("E-ink Display Scheduler starting...")
         
-        if not self.load_config():
-            logging.error("Failed to load configuration. Exiting.")
-            sys.exit(1)
-        
-        logging.info("Scheduler initialized successfully")
+        self.load_config()
         
         # On startup, update display for current period
         now = datetime.now()

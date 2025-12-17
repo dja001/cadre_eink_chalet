@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 import requests
 from io import BytesIO
 
-def get_nhl_standings_image():
+def make_nhl_standings_image():
     """
     Generate a 1200x1600 PNG image displaying current NHL standings.
     Montreal Canadiens are highlighted with bold text and red background.
@@ -137,11 +137,14 @@ def get_nhl_standings_image():
 
         y_offset += 10
 
-    return img
+        fig_name = "figures/nhl_standings.png"
+        img.save(fig_name)
+
+    return fig_name
+
 
 
 # Example usage
 if __name__ == "__main__":
-    standings_img = get_nhl_standings_image()
-    standings_img.save("nhl_standings.png")
-    print("NHL standings image saved as 'nhl_standings.png'")
+    fig_name = make_nhl_standings_image()
+    print(f"NHL standings image saved as {fig_name}")
