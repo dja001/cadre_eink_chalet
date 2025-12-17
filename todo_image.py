@@ -2,28 +2,6 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 
-def get_todo_from_dropbox():
-
-    import os
-    import dropbox
-
-    access_token = os.getenv('DROPBOX_API_TOKEN')
-    if access_token is None:
-        raise ValueError('Pleas load dropbox api token in env before running this script')
-    
-    dbx = dropbox.Dropbox(access_token)
-    
-    metadata, res = dbx.files_download("/listes/fermeture_du_chalet.txt")
-    #print(metadata)
-    #print(res)
-    #print(res.content)
-    #f.write(res.content)
-
-    text = res.content.decode("utf-8")
-    lines = text.splitlines()
-
-    return lines
-
 
 def create_todo_display_image(todo_list, npix_h=1200, npix_v=1600, bg_image=None,
                               font_path=None, padding=40, output_name='figures/todo.png'):
@@ -245,7 +223,10 @@ def wrap_text(text, font, max_width, draw):
 
 def todo_fermeture_chalet():
 
-    todos = get_todo_from_dropbox()
+    from dropbox_access import get_todo_list
+
+    todos = get_todo_list()
+
     return create_todo_display_image(todos)
 
     
@@ -256,7 +237,8 @@ if __name__ == "__main__":
 
 
 
-    todo_fermeture_chalet()
+    res = todo_fermeture_chalet()
+    print(res)
 
 
     # Example todo list
