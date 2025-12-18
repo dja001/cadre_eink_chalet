@@ -65,14 +65,14 @@ def eink_update(image_path: str) -> None:
 
     import os
     import shutil
-
+    import tempfile
+    
     src = image_path
     dst = 'figures/current_image.png'
-
-    if os.path.isfile(dst):
-        os.remove(dst)
-
-    shutil.copyfile(src, dst)
+    
+    tmp = dst + '.tmp'
+    shutil.copyfile(src, tmp)
+    os.replace(tmp, dst)   # atomic on Linux
 
 
     # Replace with your actual e-ink update code
@@ -212,7 +212,9 @@ class EinkScheduler:
             logging.info(f"Starting in scheduled period: {active_schedule}")
             func = FUNCTION_MAP[active_schedule.function_name]
             image_path = self.run_display_function(func)
-            if image_path:
+            if image_path == 'shutdown':
+                self.clear_display()
+            else:
                 self.update_display(image_path)
                 self.current_schedule = active_schedule
         else:
@@ -236,7 +238,9 @@ class EinkScheduler:
                     logging.info(f"Entering scheduled period: {active_schedule}")
                     func = FUNCTION_MAP[active_schedule.function_name]
                     image_path = self.run_display_function(func)
-                    if image_path:
+                    if image_path == 'shutdown':
+                        self.clear_display()
+                    else:
                         self.update_display(image_path)
                     self.current_schedule = active_schedule
                     self.last_update_time = now
