@@ -12,6 +12,15 @@ from pathlib import Path
 from typing import List, Callable, Optional, Tuple
 import sys
 
+# config file and Schedule class
+from config_file_handler import load_config
+from config_file_handler import Schedule
+
+# eink update / clear functions
+from eink_driver import eink_update
+from eink_driver import eink_clear
+
+# image generating functions
 from xkcd_image import xkcd_todays_image
 from xkcd_image import xkcd_random_image
 from todo_image import todo_fermeture_chalet
@@ -23,8 +32,8 @@ from moon_phase import generate_moon_phase_image
 # CONFIGURATION - Modify these paths and settings
 # ============================================================================
 
-scheduler_dir = '/home/dominik/Documents/cadre_chalet_code/'
-#scheduler_dir = '/home/pi/eink_scheduler/'
+#scheduler_dir = '/home/dominik/Documents/cadre_chalet_code/'
+scheduler_dir = '/home/pilist/eink_scheduler/'
 
 CONFIG_FILE = scheduler_dir + "schedule.conf"
 ERROR_LOG_FILE = scheduler_dir + "error.log"
@@ -59,48 +68,18 @@ FUNCTION_MAP = {
 }
 
 # ============================================================================
-# E-INK CONTROL FUNCTIONS - Replace with your actual e-ink driver calls
-# ============================================================================
-
-def eink_update(image_path: str) -> None:
-    """Update e-ink display with given image"""
-    logging.info(f"Updating e-ink display with: {image_path}")
-
-    import os
-    import shutil
-    import tempfile
-    
-    src = image_path
-    dst = 'figures/current_image.png'
-    
-    tmp = dst + '.tmp'
-    shutil.copyfile(src, tmp)
-    os.replace(tmp, dst)   # atomic on Linux
-
-
-    # Replace with your actual e-ink update code
-    # Example: epd.display(epd.getbuffer(Image.open(image_path)))
-    pass
-
-def eink_clear() -> None:
-    """Clear e-ink display"""
-    logging.info("Clearing e-ink display")
-    # Replace with your actual e-ink clear code
-    # Example: epd.clear()
-    pass
-
-# ============================================================================
 # SCHEDULER CODE
 # ============================================================================
 
 class EinkScheduler:
     """Main scheduler class"""
     
-    def __init__(self):
+    def __init__(self, test_mode=False):
         self.schedules: List[Schedule] = []
         self.last_update_time: Optional[datetime] = None
         self.current_schedule: Optional[Schedule] = None
         self.setup_logging()
+        self.test_mode = test_mode
         
     def setup_logging(self):
         """Setup logging configuration"""
@@ -125,7 +104,6 @@ class EinkScheduler:
         
     def load_config(self) -> bool:
         """load pre-programmed schedule times"""
-        from config_file_handler import load_config
 
         success, schedules = load_config('schedule.conf', FUNCTION_MAP)
         if success:
@@ -178,7 +156,7 @@ class EinkScheduler:
     def update_display(self, image_path: str) -> bool:
         """Update the e-ink display with error handling"""
         try:
-            eink_update(image_path)
+            eink_update(image_path, test_mode=self.test_mode)
             return True
         except Exception as e:
             logging.error(f"E-ink update command crashed: {e}")
@@ -187,7 +165,7 @@ class EinkScheduler:
     def clear_display(self) -> bool:
         """Clear the e-ink display with error handling"""
         try:
-            eink_clear()
+            eink_clear(test_mode=self.test_mode)
             return True
         except Exception as e:
             logging.error(f"E-ink clear command crashed: {e}")
@@ -279,5 +257,5 @@ class EinkScheduler:
 # ============================================================================
 
 if __name__ == "__main__":
-    scheduler = EinkScheduler()
+    scheduler = EinkScheduler(test_mode=False)
     scheduler.run()

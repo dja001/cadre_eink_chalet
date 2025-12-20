@@ -67,7 +67,7 @@ sudo journalctl -u eink-scheduler.service -f
 sudo journalctl -u eink-scheduler.service
 
 # Error log file
-cat /home/pi/eink_scheduler/error.log
+cat /home/pilist/eink_scheduler/error.log
 ```
 
 ## Service Management Commands

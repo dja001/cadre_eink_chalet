@@ -8,7 +8,7 @@ import numpy as np
 
 def generate_moon_phase_image(
     output_dir="./figures",
-    cache_dir="./figures/moon_cache",
+    cache_dir="./__pycache__/moon_cache",
     latitude=45.5017,      # Montreal latitude
     longitude=-73.5673,    # Montreal longitude
     test_mode=False,
@@ -313,8 +313,8 @@ if __name__ == "__main__":
     
     # Configure for Montreal, Quebec
     base_config = {
-        "output_dir": "./moon_images",
-        "cache_dir": "./moon_cache",
+        "output_dir": "./figures/moon_images",
+        "cache_dir": "./__pycache__/moon_cache",
         "latitude": 45.5017,      # Montreal latitude
         "longitude": -73.5673,    # Montreal longitude
         "test_mode": True
@@ -360,6 +360,7 @@ if __name__ == "__main__":
         phase_pct = moon_obj.phase
         
         print(f"{phase_name:15} - {test_date.strftime('%Y-%m-%d')} - Phase: {phase_pct:5.1f}% - Generated: {image_path}")
+        exit()
     
     print("\n✓ All test images generated successfully!")
     print("\nFor regular use in Montreal, call the function:")
