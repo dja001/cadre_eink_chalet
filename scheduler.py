@@ -17,6 +17,7 @@ from xkcd_image import xkcd_random_image
 from todo_image import todo_fermeture_chalet
 from random_image_from_dropbox import random_image_from_dropbox
 from nhl_classification import make_nhl_standings_image
+from moon_phase import generate_moon_phase_image
 
 # ============================================================================
 # CONFIGURATION - Modify these paths and settings
@@ -41,7 +42,8 @@ def shutdown_display() -> str:
 # List of available display functions for random selection
 DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY = [xkcd_random_image, 
                                      random_image_from_dropbox, 
-                                     make_nhl_standings_image
+                                     make_nhl_standings_image,
+                                     generate_moon_phase_image,
                                     ]
 
 # Dictionary mapping function names to actual functions
@@ -52,7 +54,8 @@ FUNCTION_MAP = {
     "xkcd_random_image": xkcd_random_image,
     "todo_fermeture_chalet": todo_fermeture_chalet,
     "random_image_from_dropbox": random_image_from_dropbox,
-    "make_nhl_standings_image": make_nhl_standings_image
+    "make_nhl_standings_image": make_nhl_standings_image,
+    "generate_moon_phase_image": generate_moon_phase_image,
 }
 
 # ============================================================================
@@ -210,7 +213,7 @@ class EinkScheduler:
         
         if active_schedule:
             logging.info(f"Starting in scheduled period: {active_schedule}")
-            func = FUNCTION_MAP[active_schedule.function_name]
+            func = FUNCTION_MAP[active_schedule.func_name]
             image_path = self.run_display_function(func)
             if image_path == 'shutdown':
                 self.clear_display()
@@ -236,7 +239,7 @@ class EinkScheduler:
                 # Check if we've entered a new scheduled period
                 if active_schedule and active_schedule != self.current_schedule:
                     logging.info(f"Entering scheduled period: {active_schedule}")
-                    func = FUNCTION_MAP[active_schedule.function_name]
+                    func = FUNCTION_MAP[active_schedule.func_name]
                     image_path = self.run_display_function(func)
                     if image_path == 'shutdown':
                         self.clear_display()
