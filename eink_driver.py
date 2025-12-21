@@ -44,7 +44,7 @@ def eink_update(image_path: str,
             logging.exception("Something went wrong")
             epd.sleep()
 
-def eink_clear() -> None:
+def eink_clear(test_mode) -> None:
     """Clear e-ink display"""
     logging.info("Clearing e-ink display")
 

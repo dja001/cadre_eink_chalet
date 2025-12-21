@@ -37,7 +37,7 @@ scheduler_dir = '/home/pilist/eink_scheduler/'
 
 CONFIG_FILE = scheduler_dir + "schedule.conf"
 ERROR_LOG_FILE = scheduler_dir + "error.log"
-RANDOM_UPDATE_INTERVAL_MINUTES = 1  # How often to update when not in scheduled period
+RANDOM_UPDATE_INTERVAL_MINUTES = 10  # How often to update when not in scheduled period
 CHECK_INTERVAL_SECONDS = 30  # How often to check if we need to update
 
 # ============================================================================
@@ -48,9 +48,12 @@ def shutdown_display() -> str:
     """Function that does nothing but output shutdown instruction"""
     return "shutdown"
 
+# repeat functions to increase their chance of being randomly choosen
+repeated_random_imgs = [random_image_from_dropbox]*6
+
 # List of available display functions for random selection
 DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY = [xkcd_random_image, 
-                                     random_image_from_dropbox, 
+                                     *repeated_random_imgs, 
                                      make_nhl_standings_image,
                                      generate_moon_phase_image,
                                     ]

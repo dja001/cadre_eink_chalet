@@ -3,7 +3,7 @@
 
 ## schedule.conf
 
-Create this file at `/home/pi/eink_scheduler/schedule.conf`:
+Create this file at `/home/pilist/eink_scheduler/schedule.conf`:
 
 ```
 # Schedule configuration for e-ink display
@@ -29,16 +29,16 @@ Create this file at `/home/pi/eink_scheduler/schedule.conf`:
 
 ### 1. Create directory structure
 ```bash
-mkdir -p /home/pi/eink_scheduler
-cd /home/pi/eink_scheduler
+mkdir -p /home/pilist/eink_scheduler
+cd /home/pilist/eink_scheduler
 ```
 
 ### 2. Create the files
-- Copy the Python scheduler code to `/home/pi/eink_scheduler/scheduler.py`
-- Create the configuration file at `/home/pi/eink_scheduler/schedule.conf`
+- Copy the Python scheduler code to `/home/pilist/eink_scheduler/scheduler.py`
+- Create the configuration file at `/home/pilist/eink_scheduler/schedule.conf`
 - Make the Python script executable:
 ```bash
-chmod +x /home/pi/eink_scheduler/scheduler.py
+chmod +x /home/pilist/eink_scheduler/scheduler.py
 ```
 
 ### 3. Install the systemd service
@@ -67,7 +67,7 @@ sudo journalctl -u eink-scheduler.service -f
 sudo journalctl -u eink-scheduler.service
 
 # Error log file
-cat /home/pilist/eink_scheduler/error.log
+cat /home/pilistlist/eink_scheduler/error.log
 ```
 
 ## Service Management Commands
@@ -97,7 +97,7 @@ sudo systemctl enable eink-scheduler.service
 Before setting up the service, test the scheduler manually:
 
 ```bash
-cd /home/pi/eink_scheduler
+cd /home/pilist/eink_scheduler
 python3 scheduler.py
 ```
 
@@ -106,7 +106,7 @@ Press Ctrl+C to stop.
 ## Troubleshooting
 
 **Service won't start:**
-- Check permissions: `ls -l /home/pi/eink_scheduler/`
+- Check permissions: `ls -l /home/pilist/eink_scheduler/`
 - Check Python path: `which python3`
 - View errors: `sudo journalctl -u eink-scheduler.service -n 50`
 
