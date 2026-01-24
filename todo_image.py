@@ -2,6 +2,14 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 import io
 import re
+from pathlib import Path
+
+# Package root (works both installed + editable)
+PACKAGE_ROOT = Path(__file__).resolve().parent
+
+# Fonts shipped with the package
+PACKAGE_FONT_DIR = PACKAGE_ROOT / "fonts"  # or PACKAGE_ROOT / "fonts" if you later move them
+
 
 
 def parse_markdown_todo(todo_list):
@@ -120,31 +128,41 @@ def create_todo_display_image(todo_list, npix_h=1200, npix_v=1600, bg_image=None
 
     # Font paths
     lm_paths = [
-        '/usr/share/fonts/opentype/lmodern/lmroman10-regular.otf',
-        '/usr/share/fonts/truetype/lmodern/lmroman10-regular.ttf',
-        'C:\\Windows\\Fonts\\lmroman10-regular.otf',
+    # --- packaged fonts FIRST ---
+    PACKAGE_FONT_DIR / "lmroman10-regular.otf",
+    PACKAGE_FONT_DIR / "lmroman10-regular.ttf",
+
+    # --- system fallbacks ---
+    Path("/usr/share/fonts/opentype/lmodern/lmroman10-regular.otf"),
+    Path("/usr/share/fonts/truetype/lmodern/lmroman10-regular.ttf"),
+    Path("C:/Windows/Fonts/lmroman10-regular.otf"),
     ]
+    
     lm_bold_paths = [
-        '/usr/share/fonts/opentype/lmodern/lmroman10-bold.otf',
-        '/usr/share/fonts/truetype/lmodern/lmroman10-bold.ttf',
-        'C:\\Windows\\Fonts\\lmroman10-bold.otf',
+        # --- packaged fonts FIRST ---
+        PACKAGE_FONT_DIR / "lmroman10-bold.otf",
+        PACKAGE_FONT_DIR / "lmroman10-bold.ttf",
+    
+        # --- system fallbacks ---
+        Path("/usr/share/fonts/opentype/lmodern/lmroman10-bold.otf"),
+        Path("/usr/share/fonts/truetype/lmodern/lmroman10-bold.ttf"),
+        Path("C:/Windows/Fonts/lmroman10-bold.otf"),
     ]
 
     # Load fonts
     def load_font(size, bold=False):
-        try:
-            if font_path:
-                return ImageFont.truetype(font_path, size)
-            else:
-                paths = lm_bold_paths if bold else lm_paths
-                for path in paths:
-                    try:
-                        return ImageFont.truetype(path, size)
-                    except:
-                        continue
-                return ImageFont.load_default()
-        except:
-            return ImageFont.load_default()
+        if font_path:
+            return ImageFont.truetype(font_path, size)
+    
+        paths = lm_bold_paths if bold else lm_paths
+        for path in paths:
+            try:
+                if Path(path).exists():
+                    return ImageFont.truetype(str(path), size)
+            except OSError:
+                continue
+    
+        return ImageFont.load_default()
 
     # Create fonts for different elements
     header_font = load_font(int(base_font_size * 1.3), bold=True)
