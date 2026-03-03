@@ -4,3 +4,4 @@ __pycache__
 *.log
 figures
 cropped_pictures
+.claude
