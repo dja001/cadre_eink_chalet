@@ -10,6 +10,7 @@ import sys
 import os
 import re
 from PIL import Image, ImageTk
+from process_for_eink import process_image
 
 UI_SCALE = 2.0
 EDGE_GRAB = int(10 * UI_SCALE)   # thickness of edge grab zones
@@ -401,6 +402,7 @@ class CropWindow:
 
         out = get_unique_filename(self.output_dir, os.path.basename(self.image_path))
         final.save(out, "PNG")
+        process_image(out, out)
         print("Saved:", out)
 
         self.remove_from_list()
@@ -422,8 +424,9 @@ class CropWindow:
 
 
 def main():
-    output_dir = "./cropped_pictures"
-    list_file = os.path.join(output_dir, "pictures_to_process.txt")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(script_dir, "color_process")
+    list_file = os.path.join(script_dir, "pictures_to_process.txt")
     os.makedirs(output_dir, exist_ok=True)
 
     if len(sys.argv) > 1:
