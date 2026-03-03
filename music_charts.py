@@ -1,6 +1,6 @@
 """
 Music Charts Display
-Shows the top 5 most-played songs in 8 cities across two columns,
+Shows the top 5 most-played songs in 6 cities across two columns,
 fetched from the Apple Music RSS feed.
 """
 
@@ -25,12 +25,10 @@ CITIES = [
     {"name": "New York",   "flag": "🇺🇸", "cc": "us", "color": "#1A3A6B"},
     {"name": "London",     "flag": "🇬🇧", "cc": "gb", "color": "#C8102E"},
     {"name": "Paris",      "flag": "🇫🇷", "cc": "fr", "color": "#6B2D8B"},
-    {"name": "Montreal",   "flag": "🇨🇦", "cc": "ca", "color": "#005A9C"},
     # Right column
+    {"name": "Montreal",   "flag": "🇨🇦", "cc": "ca", "color": "#005A9C"},
     {"name": "Seoul",      "flag": "🇰🇷", "cc": "kr", "color": "#1A7A6B"},
-    {"name": "São Paulo",  "flag": "🇧🇷", "cc": "br", "color": "#1F6B2D"},
     {"name": "Tokyo",      "flag": "🇯🇵", "cc": "jp", "color": "#C8374A"},
-    {"name": "Sydney",     "flag": "🇦🇺", "cc": "au", "color": "#CC5500"},
 ]
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
@@ -38,31 +36,47 @@ FONT_DIR = PACKAGE_ROOT / "fonts"
 
 # Layout
 IMG_W, IMG_H = 1200, 1600
-TITLE_H = 80
+TITLE_H = 90
 COL_W = 600                                           # two equal columns
-CITY_HEADER_H = 55
-ROW_H = 65
+CITY_HEADER_H = 72
+ROW_H = 86
 ROWS_PER_CITY = 5
-CITY_BLOCK_H = CITY_HEADER_H + ROWS_PER_CITY * ROW_H  # 55 + 325 = 380
-# 4 city blocks × 380px + 80px title = 1600px ✓
+ART_SIZE = 72
+CITY_BLOCK_H = CITY_HEADER_H + ROWS_PER_CITY * ROW_H  # 72 + 430 = 502
+# 3 city blocks × 502px + 90px title = 1596px  → 4px bottom margin
 
 # Per-column element offsets (relative to x_col)
 _RANK_X  = 10    # left edge of rank number
-_ART_X   = 42    # left edge of album art (60×60)
-_TEXT_X  = 108   # left edge of text block
+_ART_X   = 44    # left edge of album art
+_TEXT_X  = 124   # left edge of text block (44 + 72 + 8)
 _TREND_X = 575   # centre of trend indicator
-_TEXT_MAX_W = _TREND_X - 30 - _TEXT_X  # ≈ 437px
+_TEXT_MAX_W = _TREND_X - 30 - _TEXT_X  # ≈ 421px
 
 # ---------------------------------------------------------------------------
 # Font helpers
 # ---------------------------------------------------------------------------
 
-# Noto Serif CJK covers Japanese, Korean, and Chinese (matches our serif style)
-_CJK_FONT_PATHS = {
-    "regular": Path("/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc"),
-    "bold":    Path("/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"),
-    "fallback_regular": Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
-    "fallback_bold":    Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
+# Noto CJK font candidates — ordered by preference; covers Linux Mint and Raspberry Pi OS
+_CJK_FONT_CANDIDATES = {
+    "regular": [
+        # Serif (preferred)
+        Path("/usr/share/fonts/opentype/noto/NotoSerifCJK-Regular.ttc"),
+        Path("/usr/share/fonts/truetype/noto/NotoSerifCJK-Regular.ttc"),
+        # Sans fallback
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"),
+        Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc"),
+        # Language-specific variants (some Debian/Pi installs)
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf"),
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJKkr-Regular.otf"),
+    ],
+    "bold": [
+        Path("/usr/share/fonts/opentype/noto/NotoSerifCJK-Bold.ttc"),
+        Path("/usr/share/fonts/truetype/noto/NotoSerifCJK-Bold.ttc"),
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"),
+        Path("/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"),
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJKjp-Bold.otf"),
+        Path("/usr/share/fonts/opentype/noto/NotoSansCJKkr-Bold.otf"),
+    ],
 }
 
 
@@ -84,7 +98,7 @@ def _has_cjk(text: str) -> bool:
 def _load_cjk_font(size: int, bold: bool = False) -> "ImageFont.FreeTypeFont | None":
     """Load a CJK-capable font at the given size, or None if unavailable."""
     key = "bold" if bold else "regular"
-    for path in (_CJK_FONT_PATHS[key], _CJK_FONT_PATHS[f"fallback_{key}"]):
+    for path in _CJK_FONT_CANDIDATES[key]:
         if path.exists():
             try:
                 return ImageFont.truetype(str(path), size)
@@ -246,14 +260,14 @@ def compute_trends(current_songs: list, country: str, history: dict) -> list:
 # ---------------------------------------------------------------------------
 
 def fetch_artwork(url: str) -> Image.Image | None:
-    """Download album artwork and return a 60×60 RGB PIL Image, or None."""
+    """Download album artwork and return an ART_SIZE×ART_SIZE RGB PIL Image, or None."""
     if not url:
         return None
     try:
         resp = requests.get(url, timeout=8)
         resp.raise_for_status()
         img = Image.open(BytesIO(resp.content)).convert("RGB")
-        return img.resize((60, 60), Image.LANCZOS)
+        return img.resize((ART_SIZE, ART_SIZE), Image.LANCZOS)
     except Exception as e:
         print(f"fetch_artwork failed: {e}")
         return None
@@ -274,8 +288,8 @@ def draw_trend_indicator(draw: ImageDraw.ImageDraw, x: int, y: int,
     Draw trend symbol centred vertically at (x, y_top_of_row).
     trend: "up" → green ↑, "down" → red ↓, "same" → gray —, "new" → blue NEW
     """
-    font_arrow = _load_font(28, bold=True)
-    font_new = _load_font(18, bold=True)
+    font_arrow = _load_font(34, bold=True)
+    font_new = _load_font(22, bold=True)
 
     center_y = y + row_h // 2
 
@@ -295,8 +309,8 @@ def draw_trend_indicator(draw: ImageDraw.ImageDraw, x: int, y: int,
 
 def generate_music_charts_image() -> str | None:
     """
-    Build a 1200×1600 PNG showing the top 5 Apple Music songs in 8 cities
-    arranged in two side-by-side columns of 4 cities each.
+    Build a 1200×1600 PNG showing the top 5 Apple Music songs in 6 cities
+    arranged in two side-by-side columns of 3 cities each.
     Returns the output file path, or None on fatal error.
     """
     os.makedirs("figures", exist_ok=True)
@@ -330,16 +344,16 @@ def generate_music_charts_image() -> str | None:
     draw = ImageDraw.Draw(img, "RGBA")
 
     # Fonts — Latin (used for most cities)
-    font_title      = _load_font(44, bold=True)
-    font_city       = _load_font(24, bold=True)
-    font_rank       = _load_font(26, bold=True)
-    font_song_lat   = _load_font(22, bold=True)
-    font_artist_lat = _load_font(18)
-    font_days       = _load_font(14, italic=True)
+    font_title      = _load_font(52, bold=True)
+    font_city       = _load_font(30, bold=True)
+    font_rank       = _load_font(32, bold=True)
+    font_song_lat   = _load_font(26, bold=True)
+    font_artist_lat = _load_font(22)
+    font_days       = _load_font(18, italic=True)
 
     # CJK variants — fall back to Latin if Noto CJK is not installed
-    font_song_cjk   = _load_cjk_font(22, bold=True) or font_song_lat
-    font_artist_cjk = _load_cjk_font(18)             or font_artist_lat
+    font_song_cjk   = _load_cjk_font(26, bold=True) or font_song_lat
+    font_artist_cjk = _load_cjk_font(22)             or font_artist_lat
 
     # Title bar (full width)
     draw.rectangle([0, 0, IMG_W, TITLE_H], fill="#1C1C1E")
@@ -349,9 +363,9 @@ def generate_music_charts_image() -> str | None:
     # Vertical divider between columns
     draw.line([(COL_W, TITLE_H), (COL_W, IMG_H)], fill="#444444", width=1)
 
-    # Two columns: left = CITIES[0:4], right = CITIES[4:8]
+    # Two columns: left = CITIES[0:3], right = CITIES[3:6]
     for col_idx, (col_cities, col_songs) in enumerate(
-        [(CITIES[:4], city_data[:4]), (CITIES[4:], city_data[4:])]
+        [(CITIES[:3], city_data[:3]), (CITIES[3:], city_data[3:])]
     ):
         x_col = col_idx * COL_W
         y = TITLE_H
@@ -386,13 +400,13 @@ def generate_music_charts_image() -> str | None:
 
                 # Album art (y-centered in row)
                 art_x = x_col + _ART_X
-                art_y = row_y + (ROW_H - 60) // 2
+                art_y = row_y + (ROW_H - ART_SIZE) // 2
                 url = song.get("artwork_url", "")
                 art = artwork_cache.get(url)
                 if art:
                     img.paste(art, (art_x, art_y))
                 else:
-                    draw.rectangle([art_x, art_y, art_x + 60, art_y + 60],
+                    draw.rectangle([art_x, art_y, art_x + ART_SIZE, art_y + ART_SIZE],
                                    fill="#CCCCCC")
 
                 # Text block
@@ -400,13 +414,13 @@ def generate_music_charts_image() -> str | None:
                 has_days_line = (song["rank"] == 1 and song.get("days_at_1"))
 
                 if has_days_line:
-                    title_y  = row_y + 4
-                    artist_y = title_y + 23
-                    days_y   = artist_y + 19
+                    title_y  = row_y + 6
+                    artist_y = title_y + 29
+                    days_y   = artist_y + 23
                 else:
-                    total_h  = 23 + 4 + 19
+                    total_h  = 29 + 6 + 23
                     title_y  = row_y + (ROW_H - total_h) // 2
-                    artist_y = title_y + 27
+                    artist_y = title_y + 33
 
                 # Pick CJK font when title/artist contain Japanese or Korean
                 f_song   = font_song_cjk   if _has_cjk(song["title"])  else font_song_lat
