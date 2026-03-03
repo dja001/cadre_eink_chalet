@@ -39,6 +39,7 @@ CONFIG_FILE = scheduler_dir + "schedule.conf"
 ERROR_LOG_FILE = scheduler_dir + "error.log"
 RANDOM_UPDATE_INTERVAL_MINUTES = 10  # How often to update when not in scheduled period
 CHECK_INTERVAL_SECONDS = 30  # How often to check if we need to update
+OVERRIDE_FILE = scheduler_dir + "override.txt"
 
 # ============================================================================
 # DISPLAY FUNCTIONS - Replace these with your actual functions
@@ -181,6 +182,24 @@ class EinkScheduler:
         
         elapsed = datetime.now() - self.last_update_time
         return elapsed >= timedelta(minutes=RANDOM_UPDATE_INTERVAL_MINUTES)
+
+    def get_override_function(self) -> Optional[Callable]:
+        try:
+            p = Path(OVERRIDE_FILE)
+            if not p.exists():
+                return None
+
+            func_name = p.read_text().strip()
+            if func_name in FUNCTION_MAP:
+                return FUNCTION_MAP[func_name]
+
+            logging.warning(f"Invalid override function: {func_name}")
+            return None
+
+        except Exception as e:
+            logging.error(f"Failed to read override file: {e}")
+            return None
+
     
     def run(self):
         """Main scheduler loop"""
@@ -216,6 +235,22 @@ class EinkScheduler:
                 now = datetime.now()
                 
                 active_schedule = self.get_active_schedule(now)
+
+                # Check if there is something in the override file
+                override_func = self.get_override_function()
+                if override_func:
+                    logging.info(f"Override active: {override_func.__name__}")
+                    # clear override so it does not get reused
+                    Path(OVERRIDE_FILE).unlink(missing_ok=True)
+                    # display override image
+                    image_path = self.run_display_function(override_func)
+                    if image_path == 'shutdown':
+                        self.clear_display()
+                    elif image_path:
+                        self.update_display(image_path)
+                
+                    self.last_update_time = now
+                    continue
                 
                 # Check if we've entered a new scheduled period
                 if active_schedule and active_schedule != self.current_schedule:
@@ -233,6 +268,7 @@ class EinkScheduler:
                 elif not active_schedule and self.current_schedule is not None:
                     logging.info(f"Exiting scheduled period: {self.current_schedule}")
                     self.current_schedule = None
+
                     # Immediately run random function
                     image_path = self.run_random_function()
                     if image_path:
