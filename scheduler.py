@@ -8,6 +8,7 @@ import time
 import random
 import logging
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 from typing import List, Callable, Optional, Tuple
 import sys
@@ -41,6 +42,7 @@ ERROR_LOG_FILE = scheduler_dir + "error.log"
 RANDOM_UPDATE_INTERVAL_MINUTES = 10  # How often to update when not in scheduled period
 CHECK_INTERVAL_SECONDS = 30  # How often to check if we need to update
 OVERRIDE_FILE = scheduler_dir + "override.txt"
+EASTERN_TZ = ZoneInfo("America/New_York")
 
 # ============================================================================
 # DISPLAY FUNCTIONS - Replace these with your actual functions
@@ -183,7 +185,7 @@ class EinkScheduler:
         if self.last_update_time is None:
             return True
         
-        elapsed = datetime.now() - self.last_update_time
+        elapsed = datetime.now(EASTERN_TZ) - self.last_update_time
         return elapsed >= timedelta(minutes=RANDOM_UPDATE_INTERVAL_MINUTES)
 
     def get_override_function(self) -> Optional[Callable]:
@@ -211,7 +213,7 @@ class EinkScheduler:
         self.load_config()
         
         # On startup, update display for current period
-        now = datetime.now()
+        now = datetime.now(EASTERN_TZ)
         active_schedule = self.get_active_schedule(now)
         
         if active_schedule:
@@ -235,7 +237,7 @@ class EinkScheduler:
         while True:
             try:
                 time.sleep(CHECK_INTERVAL_SECONDS)
-                now = datetime.now()
+                now = datetime.now(EASTERN_TZ)
                 
                 active_schedule = self.get_active_schedule(now)
 
