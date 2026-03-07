@@ -73,19 +73,21 @@ def get_unique_filename(output_dir, filename):
 
 
 class CropWindow:
-    def __init__(self, image_path, list_file, output_dir):
+    def __init__(self, image_path, list_file, output_dir=None,
+                 target_ratio=3/4, save_inplace=False):
         import tkinter as tk
         from PIL import Image
 
         self.image_path = image_path
         self.list_file = list_file
         self.output_dir = output_dir
+        self.save_inplace = save_inplace
         self.rotation = 0
 
         self.original_image = Image.open(image_path)
         self.current_image = self.original_image.copy()
 
-        self.target_ratio = 3 / 4
+        self.target_ratio = target_ratio
 
         self.root = tk.Tk()
         self.root.title(os.path.basename(image_path))
@@ -398,12 +400,18 @@ class CropWindow:
         h = int(self.crop_height / self.display_scale)
 
         cropped = self.current_image.crop((x, y, x + w, y + h))
-        final = cropped.resize((1200, 1600), Image.Resampling.LANCZOS)
 
-        out = get_unique_filename(self.output_dir, os.path.basename(self.image_path))
-        final.save(out, "PNG")
-        process_image(out, out)
-        print("Saved:", out)
+        if self.save_inplace:
+            ext = os.path.splitext(self.image_path)[1].lower()
+            fmt = {'.jpg': 'JPEG', '.jpeg': 'JPEG', '.png': 'PNG', '.webp': 'WEBP'}.get(ext, 'JPEG')
+            cropped.save(self.image_path, fmt)
+            print("Saved in place:", self.image_path)
+        else:
+            final = cropped.resize((1200, 1600), Image.Resampling.LANCZOS)
+            out = get_unique_filename(self.output_dir, os.path.basename(self.image_path))
+            final.save(out, "PNG")
+            process_image(out, out)
+            print("Saved:", out)
 
         self.remove_from_list()
         self.root.destroy()
@@ -425,6 +433,31 @@ class CropWindow:
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # ── Bird mode: square crop, overwrite in place ────────────────────────────
+    if '--bird' in sys.argv:
+        bird_list_file = os.path.join(script_dir, "bird_pictures_to_process.txt")
+        idx = sys.argv.index('--bird')
+        has_dir = idx + 1 < len(sys.argv) and not sys.argv[idx + 1].startswith('-')
+
+        if has_dir:
+            bird_dir = sys.argv[idx + 1]
+            pictures = find_pictures(bird_dir)
+            save_picture_list(pictures, bird_list_file)
+            print(f"Found {len(pictures)} bird images in {bird_dir}")
+
+        pictures = load_picture_list(bird_list_file)
+        if not pictures:
+            print("No bird pictures to process. Pass a directory: --bird oiseaux/")
+            sys.exit(0)
+
+        while pictures:
+            CropWindow(pictures[0], bird_list_file,
+                       target_ratio=1.0, save_inplace=True).run()
+            pictures = load_picture_list(bird_list_file)
+        return
+
+    # ── Normal mode: 3:4 crop, save to color_process/ ────────────────────────
     output_dir = os.path.join(script_dir, "color_process")
     list_file = os.path.join(script_dir, "pictures_to_process.txt")
     os.makedirs(output_dir, exist_ok=True)

@@ -1,8 +1,10 @@
 *.png
 *.ttf
+bird_pictures_to_process.txt
 __pycache__
 *.log
 figures
 cropped_pictures
 .claude
 fruits_et_legumes
+oiseaux

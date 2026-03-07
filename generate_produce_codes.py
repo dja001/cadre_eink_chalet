@@ -129,7 +129,7 @@ def create_produce_image(produce_items, output_file,
 
         max_w = int(cell_w * 0.85)
         max_h = int(cell_h * 0.55)
-        produce_img.thumbnail((max_w, max_h), Image.Resampling.LANCZOS)
+        produce_img.thumbnail((max_w, max_h), Image.LANCZOS)
 
         img_x = x + (cell_w - produce_img.width) // 2
         img_y = y + 15
