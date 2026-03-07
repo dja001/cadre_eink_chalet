@@ -1,6 +1,10 @@
 import os
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
+
+EASTERN = ZoneInfo("America/New_York")
+UTC = ZoneInfo("UTC")
 import requests
 from PIL import Image, ImageDraw, ImageFont
 import ephem
@@ -33,15 +37,14 @@ def generate_moon_phase_image(
     # Image dimensions
     WIDTH, HEIGHT = 1200, 1600
 
-    # Get date to use
-    target_date = test_date if test_date else datetime.now()
+    # Get date to use (always in Eastern time)
+    target_date = test_date if test_date else datetime.now(EASTERN)
     date_str = target_date.strftime("%Y%m%d")
 
-    # Convert to 9 PM EST (which is 2 AM UTC the next day during standard time)
-    # EST is UTC-5, EDT is UTC-4
-    # Using EST (UTC-5) for consistency
+    # Build 9 PM Eastern, then convert to UTC for the NASA API.
+    # astimezone handles EST/EDT automatically.
     target_datetime_est = target_date.replace(hour=21, minute=0, second=0, microsecond=0)
-    target_datetime_utc = target_datetime_est + timedelta(hours=5)  # EST to UTC
+    target_datetime_utc = target_datetime_est.astimezone(UTC)
 
     # Format for NASA API (YYYY-MM-DDTHH:MM)
     api_time_str = target_datetime_utc.strftime("%Y-%m-%dT%H:%M")
@@ -104,8 +107,8 @@ def generate_moon_phase_image(
         sunrise = observer.next_rising(ephem.Sun())
         sunset = observer.next_setting(ephem.Sun())
 
-        sunrise_local = ephem.localtime(sunrise)
-        sunset_local = ephem.localtime(sunset)
+        sunrise_local = ephem.Date(sunrise).datetime().replace(tzinfo=UTC).astimezone(EASTERN)
+        sunset_local = ephem.Date(sunset).datetime().replace(tzinfo=UTC).astimezone(EASTERN)
 
         sunrise_str = sunrise_local.strftime("%H:%M")
         sunset_str = sunset_local.strftime("%H:%M")
@@ -118,8 +121,8 @@ def generate_moon_phase_image(
         moonrise = observer.next_rising(ephem.Moon())
         moonset = observer.next_setting(ephem.Moon())
 
-        moonrise_local = ephem.localtime(moonrise)
-        moonset_local = ephem.localtime(moonset)
+        moonrise_local = ephem.Date(moonrise).datetime().replace(tzinfo=UTC).astimezone(EASTERN)
+        moonset_local = ephem.Date(moonset).datetime().replace(tzinfo=UTC).astimezone(EASTERN)
 
         moonrise_str = moonrise_local.strftime("%H:%M")
         moonset_str = moonset_local.strftime("%H:%M")

@@ -7,7 +7,8 @@ fetched from the Apple Music RSS feed.
 import json
 import os
 import requests
-from datetime import date
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from io import BytesIO
 from pathlib import Path
 
@@ -198,7 +199,7 @@ def compute_trends(current_songs: list, country: str, history: dict) -> list:
 
     trend values: "up", "down", "same", "new"
     """
-    today_str = date.today().isoformat()
+    today_str = datetime.now(ZoneInfo("America/New_York")).date().isoformat()
     prev = history.get(country, {})
     prev_songs = prev.get("songs", [])
     prev_number_one = prev.get("number_one", {})
