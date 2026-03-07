@@ -29,6 +29,7 @@ from random_image_from_dropbox import random_image_from_dropbox
 from nhl_classification import make_nhl_standings_image
 from moon_phase import generate_moon_phase_image
 from music_charts import generate_music_charts_image
+from generate_produce_codes import generate_produce_codes_image
 
 # ============================================================================
 # CONFIGURATION - Modify these paths and settings
@@ -61,6 +62,7 @@ DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY = [xkcd_random_image,
                                      make_nhl_standings_image,
                                      generate_moon_phase_image,
                                      generate_music_charts_image,
+                                     generate_produce_codes_image,
                                     ]
 
 # Dictionary mapping function names to actual functions
@@ -74,6 +76,7 @@ FUNCTION_MAP = {
     "make_nhl_standings_image": make_nhl_standings_image,
     "generate_moon_phase_image": generate_moon_phase_image,
     "generate_music_charts_image": generate_music_charts_image,
+    "generate_produce_codes_image": generate_produce_codes_image,
 }
 
 # ============================================================================

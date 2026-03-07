@@ -1,50 +1,58 @@
 # Format: French Name,PLU Code
+# Name must match fruits_et_legumes/{Name_with_underscores}.{ext}
+
+# Fruits
 Banane,4011
-Pomme Gala,4133
-Pomme Fuji,4131
-Pomme Granny Smith,4139
+Banane bio,94011
+Mangue Ataulfo,4051
+Mangue Tommy Atkins,3111
 Avocat,4046
 Citron,4053
 Lime,4048
-Orange,4012
-Pamplemousse,4166
-Mangue,4051
+Orange Navel,3107
+Pamplemousse blanc,4286
+Pamplemousse rose,4287
 Ananas,4030
-Kiwi,4030
-Poire Bartlett,4409
+Poire Abate Fetel,4409
 Raisin rouge,4023
 Raisin vert,4022
-Fraise,4025
-Bleuet,4260
-Framboise,4035
+Cerise,4045
 Cantaloup,4050
 Melon d'eau,4032
-Pêche,4044
-Nectarine,4036
-Prune,4040
-Cerise,4045
-Tomate,4664
-Concombre,4062
-Laitue iceberg,4061
+Prune rouge,4040
+Prune bleue,4042
+
+# Tomates
+Tomate Roma,3421
+Tomate rose de serre,4664
+
+# Légumes feuilles
+Laitue frisée,4241
 Laitue romaine,4640
 Épinard,4090
+Coriandre,4889
+Persil frisé,4899
+Persil italien,4898
+Bette à carde,4628
+
+# Légumes
 Carotte,4094
 Brocoli,4060
 Chou-fleur,4079
+Chou vert,4069
+Chou napa,4625
+Chou Savoie,4624
 Poivron rouge,4688
 Poivron vert,3121
-Oignon jaune,4093
+Oignon blanc,4665
+Oignon espagnol,4159
 Oignon rouge,4082
-Pomme de terre,4072
 Patate douce,4091
 Céleri,4070
-Champignon blanc,4065
 Courgette,4067
 Aubergine,4081
-Maïs,4078
 Asperge,4080
+Fenouil,4163
+Concombre,4062
 Ail,4608
 Gingembre,4612
-Chou,4069
-Radis,4089
-Betterave,4540
