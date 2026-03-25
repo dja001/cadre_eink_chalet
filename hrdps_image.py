@@ -538,13 +538,14 @@ def generate_hrdps_image(output_dir: str = "./figures", fetch: bool = True) -> s
         borderaxespad=0,
     )
 
-    plt.tight_layout(rect=[0, 0, 1, 0.96])
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     # ── 8. Save ───────────────────────────────────────────────────────────────
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
     out_file = output_path / "hrdps_forecast.png"
-    plt.savefig(out_file, dpi=DPI, bbox_inches="tight", facecolor="white")
+    # Do NOT use bbox_inches="tight" — it resizes the canvas away from 1200×1600
+    plt.savefig(out_file, dpi=DPI, facecolor="white")
     plt.close(fig)
 
     print(f"Saved: {out_file.absolute()}")
