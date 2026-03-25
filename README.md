@@ -19,7 +19,7 @@ A Python scheduler for a [Waveshare 13.3-inch 7-color e-ink display](https://www
 
 ### XKCD Comic
 
-Fetches and renders an XKCD comic in the XKCD hand-drawn font. Either today's comic or a random one, with the alt-text caption below.
+Fetches and renders an [XKCD](https://xkcd.com) comic in the XKCD hand-drawn font. Either today's comic or a random one, with the alt-text caption below. Comics and font courtesy of [Randall Munroe](https://xkcd.com/about/) — thanks!
 
 <img src="docs/screenshots/xkcd.png" width="360">
 
@@ -43,7 +43,7 @@ Current NHL standings fetched from the NHL API. The Montréal Canadiens row is h
 
 ### Chalet Closing Checklist
 
-Fetches a Markdown to-do list from Dropbox (`/listes/fermeture_du_chalet.txt`) and renders it as a styled checklist — useful for seasonal chalet maintenance.
+Fetches a Markdown to-do list from Dropbox (`/listes/fermeture_du_chalet.txt`) and renders it as a styled checklist — used as a weekly departure checklist when leaving the chalet.
 
 <img src="docs/screenshots/todo.png" width="360">
 
@@ -85,7 +85,7 @@ Spaghetti plot of High Resolution Deterministic Prediction System (HRDPS) foreca
 
 Picks a random photo from a synced Dropbox folder (`/random_images`), scales it to fill 1200×1600 with borders matched to the image's average edge color.
 
-<img src="docs/screenshots/random_dropbox.png" width="360">
+<img src="docs/screenshots/random_dropbox.jpg" width="360">
 
 ---
 
@@ -135,7 +135,7 @@ sudo systemctl enable --now eink-scheduler.service
 sudo journalctl -u eink-scheduler.service -f
 ```
 
-The Waveshare EPD library (`epd13in3E`) must be installed separately at `/home/pilist/bin/e-Paper/`.
+The Waveshare EPD library (`epd13in3E`) must be installed separately. Set the `EPD_LIB` path at the top of `eink_driver.py` to point to the `lib/` directory of your local [e-Paper](https://github.com/waveshare/e-Paper) checkout.
 
 ## Testing Without Hardware
 
@@ -180,3 +180,9 @@ DROPBOX_REFRESH_TOKEN=...
 ```bash
 python3 -m pytest tests/
 ```
+
+`tests/test_schedule_parser.py` covers the schedule logic thoroughly:
+
+- **`Schedule.is_active()`** — single-day, multi-day, weekday ranges, weekend-only, and midnight-spanning schedules
+- **`parse_days()`** — single days, ranges (`0-4`), lists (`0,2,4`), mixed formats, wildcard (`*`), and invalid inputs
+- **Overlap detection** — catches conflicting schedules including midnight-spanning edge cases

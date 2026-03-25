@@ -1,11 +1,16 @@
 
+import os
 import sys
 from pathlib import Path
 import logging
 from PIL import Image
 
-# driver for eink display is in a separate git depot
-EPD_LIB = Path("/home/pilist/bin/e-Paper/E-paper_Separate_Program/13.3inch_e-Paper_E/RaspberryPi/python/lib")
+# Path to the Waveshare e-Paper library (epd13in3E).
+# Override by setting the EPD_LIB environment variable, or edit the default below.
+# The path should point to the lib/ directory of the e-Paper repository:
+#   https://github.com/waveshare/e-Paper
+_default_epd_lib = "/home/pilist/bin/e-Paper/E-paper_Separate_Program/13.3inch_e-Paper_E/RaspberryPi/python/lib"
+EPD_LIB = Path(os.environ.get("EPD_LIB", _default_epd_lib))
 
 if str(EPD_LIB) not in sys.path:
     sys.path.insert(0, str(EPD_LIB))
