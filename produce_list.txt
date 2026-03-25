@@ -4,15 +4,15 @@
 # Fruits
 Banane,4011
 Banane bio,94011
-Mangue Ataulfo,4051
-Mangue Tommy Atkins,3111
+Mangue Ataulfo,4312
+Mangue Tommy Atkins,4051
 Avocat,4046
 Citron,4053
 Lime,4048
 Orange Navel,3107
-Pamplemousse blanc,4286
-Pamplemousse rose,4287
-Ananas,4030
+Pamplemousse blanc,4290
+Pamplemousse rose,4281
+Ananas,4029
 Poire Abate Fetel,4409
 Raisin rouge,4023
 Raisin vert,4022
@@ -23,8 +23,8 @@ Prune rouge,4040
 Prune bleue,4042
 
 # Tomates
-Tomate Roma,3421
-Tomate rose de serre,4664
+Tomate Roma,4087
+Tomate rose de serre,4807
 
 # Légumes feuilles
 Laitue frisée,4241
@@ -43,9 +43,9 @@ Chou vert,4069
 Chou napa,4625
 Chou Savoie,4624
 Poivron rouge,4688
-Poivron vert,3121
-Oignon blanc,4665
-Oignon espagnol,4159
+Poivron vert,4065
+Oignon blanc,4663
+Oignon espagnol,4093
 Oignon rouge,4082
 Patate douce,4091
 Céleri,4070
