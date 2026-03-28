@@ -7,7 +7,6 @@ Manages scheduled and random display updates for e-ink display
 import time
 import random
 import logging
-import threading
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from pathlib import Path
@@ -33,7 +32,6 @@ from music_charts import generate_music_charts_image
 from generate_produce_codes import generate_produce_codes_image
 from generate_bird_names import generate_bird_names_image
 from hrdps_image import generate_hrdps_image
-from hrdps_fetch import fetch_all_missing
 
 # ============================================================================
 # CONFIGURATION - Modify these paths and settings
@@ -222,10 +220,6 @@ class EinkScheduler:
         logging.info("E-ink Display Scheduler starting...")
         
         self.load_config()
-
-        # Fetch HRDPS data in the background so startup isn't blocked
-        threading.Thread(target=fetch_all_missing, daemon=True, name="hrdps-fetch").start()
-        logging.info("HRDPS background fetch started")
 
         # On startup, update display for current period
         now = datetime.now(EASTERN_TZ)

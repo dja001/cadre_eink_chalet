@@ -141,6 +141,26 @@ sudo systemctl enable --now eink-scheduler.service
 sudo journalctl -u eink-scheduler.service -f
 ```
 
+### HRDPS Data Fetching (Crontab)
+
+`hrdps_fetch.py` requires `eccodes` and `cfgrib`, which are easiest to install via `miniforge`/`mamba`:
+
+```bash
+mamba create -n eink_display_env python=3.11 eccodes cfgrib numpy requests -c conda-forge
+```
+
+Schedule it to run ~1.5h after each HRDPS model run (00Z, 06Z, 12Z, 18Z UTC):
+
+```bash
+crontab -e
+```
+
+Add:
+
+```
+24 1,7,13,19 * * * cd /home/pilist/eink_scheduler && /home/pilist/miniforge3/envs/eink_display_env/bin/python3 hrdps_fetch.py >> hrdps_data/fetch.log 2>&1
+```
+
 The Waveshare EPD library (`epd13in3E`) must be installed separately. Set the `EPD_LIB` path at the top of `eink_driver.py` to point to the `lib/` directory of your local [e-Paper](https://github.com/waveshare/e-Paper) checkout.
 
 ## Testing Without Hardware
