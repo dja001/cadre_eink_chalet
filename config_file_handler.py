@@ -215,14 +215,7 @@ def load_config(config_file: str, function_map: dict) -> Tuple[bool, List[Schedu
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
-    # Mock function map for testing
-    FUNCTION_MAP = {
-        'function1': lambda: None,
-        'function2': lambda: None,
-        'function3': lambda: None,
-        'todo_fermeture_chalet': lambda: None,
-        'shutdown_display': lambda: None,
-    }
+    from scheduler import FUNCTION_MAP
 
     success, schedules = load_config('schedule.conf', FUNCTION_MAP)
 

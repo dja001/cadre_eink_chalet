@@ -28,6 +28,10 @@ mamba install python numpy pillow matplotlib
 # not on conda-forge
 pip install spidev
 
+# eccodes (for HRDPS weather data — ARM needs the C library first)
+mamba install -c conda-forge eccodes
+pip install eccodes
+
 -------------------------------------
 
 latin modern font

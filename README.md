@@ -109,6 +109,12 @@ Picks a random photo from a synced Dropbox folder (`/random_images`), scales it 
 
 Overlapping schedules are detected and cause a startup error.
 
+To validate `schedule.conf` without restarting the service:
+
+```bash
+python3 config_file_handler.py
+```
+
 ## Adding a New Display Function
 
 1. Create a function that returns a file path string (or `None` on failure, `"shutdown"` to clear).
