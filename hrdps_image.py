@@ -310,7 +310,7 @@ def _run_linewidth(run_idx: int, n_runs: int) -> float:
 # Figure generation
 # ---------------------------------------------------------------------------
 
-def generate_hrdps_image(output_dir: str = "./figures", fetch: bool = True) -> str | None:
+def generate_hrdps_image(output_dir: str = "./figures", fetch: bool = False) -> str | None:
     """Render the four-panel figure, return PNG path.
 
     Args:
