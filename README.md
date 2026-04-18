@@ -41,6 +41,14 @@ Current NHL standings fetched from the NHL API. The Montréal Canadiens row is h
 
 ---
 
+### NHL Playoff Bracket
+
+Full playoff bracket tree fetched from the NHL API. West Conference on the left, East on the right (map orientation). Each matchup box shows team logos, bold winner, and series score. MTL highlighted in red. Logos cached locally after first fetch.
+
+<img src="docs/screenshots/nhl_playoffs.png" width="360">
+
+---
+
 ### Chalet Closing Checklist
 
 Fetches a Markdown to-do list from Dropbox (`/listes/fermeture_du_chalet.txt`) and renders it as a styled checklist — used as a weekly departure checklist when leaving the chalet.
