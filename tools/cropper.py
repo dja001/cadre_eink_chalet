@@ -9,6 +9,7 @@ Usage:
 import sys
 import os
 import re
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from PIL import Image, ImageTk
 from process_for_eink import process_image
 
@@ -432,7 +433,7 @@ class CropWindow:
 
 
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # ── Bird mode: square crop, overwrite in place ────────────────────────────
     if '--bird' in sys.argv:

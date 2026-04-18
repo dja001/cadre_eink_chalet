@@ -39,11 +39,11 @@ In `test_mode`, `eink_update()` copies the image to `figures/current_image.png` 
 
 ```bash
 # Crop photos to 3:4 ratio (GUI tool):
-python3 cropper.py /path/to/photos   # First run: scan and build list
-python3 cropper.py                    # Subsequent runs: crop pictures one by one
+python3 tools/cropper.py /path/to/photos   # First run: scan and build list
+python3 tools/cropper.py                    # Subsequent runs: crop pictures one by one
 
 # Batch process images for e-ink (contrast/saturation boost):
-python3 process_for_eink.py
+python3 tools/process_for_eink.py
 ```
 
 ## Systemd Service Management
@@ -104,7 +104,7 @@ sudo journalctl -u eink-scheduler.service -f
 
 - All output images must be **1200×1600 px** (portrait, 3:4 ratio)
 - Palette: 7-color e-ink (black, white, yellow, red, orange, blue, green) — quantization is optional in `process_for_eink.py`
-- `cropper.py` → `cropped_pictures/` → `process_for_eink.py` → `color_process/` → used by `random_image_from_dropbox.py`
+- `tools/cropper.py` → `cropped_pictures/` → `tools/process_for_eink.py` → `color_process/` → used by `random_image_from_dropbox.py`
 - Output images land in `figures/`; `figures/current_image.png` is always the last displayed image
 
 ### Dropbox Credentials
