@@ -130,6 +130,27 @@ python3 config_file_handler.py
 3. Optionally add it (multiple times for higher probability) to `DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY`.
 4. Reference it by name in `schedule.conf` if you want it on a fixed schedule.
 
+## Service Management
+
+```bash
+# Status / logs
+sudo systemctl status eink-scheduler.service
+sudo journalctl -u eink-scheduler.service -f        # live log tail
+sudo journalctl -u eink-scheduler.service -n 100    # last 100 lines
+cat /home/pilist/eink_scheduler/error.log           # errors only
+
+# Start / stop / restart
+sudo systemctl start eink-scheduler.service
+sudo systemctl stop eink-scheduler.service
+sudo systemctl restart eink-scheduler.service
+
+# Enable / disable autostart on boot
+sudo systemctl enable eink-scheduler.service
+sudo systemctl disable eink-scheduler.service
+```
+
+After copying updated code to the Pi, always `sudo systemctl restart eink-scheduler.service`.
+
 ## Installation on Raspberry Pi
 
 ```bash
