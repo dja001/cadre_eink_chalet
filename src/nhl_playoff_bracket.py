@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyBboxPatch
 import matplotlib.font_manager as fm
 
-SCRIPT_DIR  = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FONT_BOLD  = os.path.join(SCRIPT_DIR, 'fonts', 'lmroman10-bold.otf')
 _FONT_REG   = os.path.join(SCRIPT_DIR, 'fonts', 'lmroman10-regular.otf')
 _LOGO_DIR   = os.path.join(SCRIPT_DIR, 'figures', 'logos_cache')

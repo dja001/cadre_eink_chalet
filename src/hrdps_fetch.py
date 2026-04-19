@@ -70,7 +70,7 @@ LOOKBACK_HOURS = 72
 # ---------------------------------------------------------------------------
 # Database
 # ---------------------------------------------------------------------------
-DB_DIR = Path(__file__).parent / "hrdps_data"
+DB_DIR = Path(__file__).parent.parent / "hrdps_data"
 
 
 def get_db_path(run_time: datetime) -> Path:

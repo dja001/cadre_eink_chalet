@@ -32,7 +32,7 @@ CITIES = [
     {"name": "Tokyo",      "flag": "🇯🇵", "cc": "jp", "color": "#C8374A"},
 ]
 
-PACKAGE_ROOT = Path(__file__).resolve().parent
+PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 FONT_DIR = PACKAGE_ROOT / "fonts"
 
 # Layout

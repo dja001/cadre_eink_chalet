@@ -15,7 +15,7 @@ WorkingDirectory=/home/pilist/eink_scheduler
 
 # Path to your Python script
 # I use mamba env
-ExecStart=/home/pilist/miniforge3/envs/eink_display_env/bin/python /home/pilist/eink_scheduler/scheduler.py
+ExecStart=/home/pilist/miniforge3/envs/eink_display_env/bin/python /home/pilist/eink_scheduler/src/scheduler.py
 
 # Restart policy - automatically restart if it crashes
 Restart=always

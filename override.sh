@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-SCHEDULER="$SCRIPT_DIR/scheduler.py"
+SCHEDULER="$SCRIPT_DIR/src/scheduler.py"
 OVERRIDE_FILE="$SCRIPT_DIR/override.txt"
 
 if [[ ! -f "$SCHEDULER" ]]; then

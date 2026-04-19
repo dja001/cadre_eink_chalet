@@ -35,7 +35,7 @@ from hrdps_fetch import fetch_all_missing, DB_DIR, GORE_LAT, GORE_LON
 # ---------------------------------------------------------------------------
 # Font setup — Latin Modern Roman (bundled in fonts/)
 # ---------------------------------------------------------------------------
-_FONTS_DIR = Path(__file__).parent / "fonts"
+_FONTS_DIR = Path(__file__).parent.parent / "fonts"
 for _font_file in _FONTS_DIR.glob("lmroman*.otf"):
     _fm.fontManager.addfont(str(_font_file))
 plt.rcParams["font.family"] = "Latin Modern Roman"
