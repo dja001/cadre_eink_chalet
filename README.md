@@ -10,7 +10,7 @@ A Python scheduler for a [Waveshare 13.3-inch 7-color e-ink display](https://www
 
 ## How It Works
 
-1. `scheduler.py` reads `schedule.conf` and checks every 30 s which schedule is active.
+1. `src/scheduler.py` reads `schedule.conf` and checks every 30 s which schedule is active.
 2. **Scheduled period:** runs the mapped display function once on entry.
 3. **Outside schedule:** picks a random function from `DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY` every 10 minutes.
 4. Each display function returns a file path string, or `"shutdown"` to clear the screen, or `None` on failure.
@@ -120,15 +120,58 @@ Overlapping schedules are detected and cause a startup error.
 To validate `schedule.conf` without restarting the service:
 
 ```bash
-python3 config_file_handler.py
+python3 src/config_file_handler.py
 ```
 
 ## Adding a New Display Function
 
 1. Create a function that returns a file path string (or `None` on failure, `"shutdown"` to clear).
-2. Add it to `FUNCTION_MAP` in `scheduler.py`.
+2. Add it to `FUNCTION_MAP` in `src/scheduler.py`.
 3. Optionally add it (multiple times for higher probability) to `DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY`.
 4. Reference it by name in `schedule.conf` if you want it on a fixed schedule.
+
+## Installation on Raspberry Pi
+
+```bash
+# Clone to Pi
+git clone <repo> /home/pilist/eink_scheduler
+cd /home/pilist/eink_scheduler
+
+# Install dependencies
+pip3 install -r requirements.txt
+
+# Install and enable systemd service
+sudo cp eink-scheduler.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now eink-scheduler.service
+
+# Check logs
+sudo journalctl -u eink-scheduler.service -f
+```
+
+### Waveshare EPD Library
+
+The Waveshare EPD library (`epd13in3E`) must be installed separately. Clone the [e-Paper](https://github.com/waveshare/e-Paper) repository and set the `EPD_LIB` environment variable to point to its `lib/` directory, or update the default path at the top of `src/eink_driver.py`.
+
+### HRDPS Data Fetching (Crontab)
+
+`src/hrdps_fetch.py` requires `eccodes` and `cfgrib`, which are easiest to install via `miniforge`/`mamba`:
+
+```bash
+mamba create -n eink_display_env python=3.11 eccodes cfgrib numpy requests -c conda-forge
+```
+
+Schedule it to run ~1.5h after each HRDPS model run (00Z, 06Z, 12Z, 18Z UTC):
+
+```bash
+crontab -e
+```
+
+Add:
+
+```
+24 1,7,13,19 * * * cd /home/pilist/eink_scheduler && /home/pilist/miniforge3/envs/eink_display_env/bin/python3 src/hrdps_fetch.py >> hrdps_data/fetch.log 2>&1
+```
 
 ## Service Management
 
@@ -151,73 +194,32 @@ sudo systemctl disable eink-scheduler.service
 
 After copying updated code to the Pi, always `sudo systemctl restart eink-scheduler.service`.
 
-## Installation on Raspberry Pi
-
-```bash
-# Clone to Pi
-git clone <repo> /home/pilist/eink_scheduler
-cd /home/pilist/eink_scheduler
-
-# Install dependencies
-pip3 install -r requirements.txt
-
-# Install and enable systemd service
-sudo cp eink-scheduler.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now eink-scheduler.service
-
-# Check logs
-sudo journalctl -u eink-scheduler.service -f
-```
-
-### HRDPS Data Fetching (Crontab)
-
-`hrdps_fetch.py` requires `eccodes` and `cfgrib`, which are easiest to install via `miniforge`/`mamba`:
-
-```bash
-mamba create -n eink_display_env python=3.11 eccodes cfgrib numpy requests -c conda-forge
-```
-
-Schedule it to run ~1.5h after each HRDPS model run (00Z, 06Z, 12Z, 18Z UTC):
-
-```bash
-crontab -e
-```
-
-Add:
-
-```
-24 1,7,13,19 * * * cd /home/pilist/eink_scheduler && /home/pilist/miniforge3/envs/eink_display_env/bin/python3 src/hrdps_fetch.py >> hrdps_data/fetch.log 2>&1
-```
-
-The Waveshare EPD library (`epd13in3E`) must be installed separately. Set the `EPD_LIB` path at the top of `eink_driver.py` to point to the `lib/` directory of your local [e-Paper](https://github.com/waveshare/e-Paper) checkout.
-
 ## Testing Without Hardware
 
-Set `test_mode=True` in `scheduler.py` — `eink_update()` will copy the image to `figures/current_image.png` instead of driving the display.
+Set `test_mode=True` in `src/scheduler.py` — `eink_update()` will copy the image to `figures/current_image.png` instead of driving the display.
 
-Each generator can also be run standalone:
+Each generator can also be run standalone from the project root:
 
 ```bash
-python3 xkcd_image.py
-python3 moon_phase.py
-python3 nhl_classification.py
-python3 music_charts.py
-python3 generate_bird_names.py
-python3 generate_produce_codes.py
-python3 hrdps_image.py
-python3 todo_image.py
+python3 src/xkcd_image.py
+python3 src/moon_phase.py
+python3 src/nhl_classification.py
+python3 src/music_charts.py
+python3 src/generate_bird_names.py
+python3 src/generate_produce_codes.py
+python3 src/hrdps_image.py
+python3 src/todo_image.py
 ```
 
 ## Image Processing Tools
 
 ```bash
 # Crop photos to 3:4 ratio (interactive GUI):
-python3 cropper.py /path/to/photos   # first run: scan directory
-python3 cropper.py                    # subsequent runs: crop one by one
+python3 tools/cropper.py /path/to/photos   # first run: scan directory
+python3 tools/cropper.py                    # subsequent runs: crop one by one
 
 # Boost contrast/saturation for e-ink rendering:
-python3 process_for_eink.py
+python3 tools/process_for_eink.py
 ```
 
 ## Dropbox Credentials
