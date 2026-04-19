@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 # Package root (works both installed + editable)
-PACKAGE_ROOT = Path(__file__).resolve().parent
+PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 
 # Fonts shipped with the package
 PACKAGE_FONT_DIR = PACKAGE_ROOT / "fonts"  # or PACKAGE_ROOT / "fonts" if you later move them

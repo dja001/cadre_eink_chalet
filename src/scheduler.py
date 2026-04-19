@@ -37,14 +37,13 @@ from hrdps_image import generate_hrdps_image
 # CONFIGURATION - Modify these paths and settings
 # ============================================================================
 
-#scheduler_dir = '/home/dominik/Documents/cadre_chalet_code/'
-scheduler_dir = '/home/pilist/eink_scheduler/'
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-CONFIG_FILE = scheduler_dir + "schedule.conf"
-ERROR_LOG_FILE = scheduler_dir + "error.log"
+CONFIG_FILE = PROJECT_ROOT / "schedule.conf"
+ERROR_LOG_FILE = PROJECT_ROOT / "error.log"
 RANDOM_UPDATE_INTERVAL_MINUTES = 10  # How often to update when not in scheduled period
 CHECK_INTERVAL_SECONDS = 30  # How often to check if we need to update
-OVERRIDE_FILE = scheduler_dir + "override.txt"
+OVERRIDE_FILE = PROJECT_ROOT / "override.txt"
 EASTERN_TZ = ZoneInfo("America/New_York")
 
 # ============================================================================
@@ -123,7 +122,7 @@ class EinkScheduler:
     def load_config(self) -> bool:
         """load pre-programmed schedule times"""
 
-        success, schedules = load_config('schedule.conf', FUNCTION_MAP)
+        success, schedules = load_config(CONFIG_FILE, FUNCTION_MAP)
         if success:
             logging.info("\n Configuration loaded successfully!")
             logging.info(f"Total schedules: {len(schedules)}")
