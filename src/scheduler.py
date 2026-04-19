@@ -27,6 +27,7 @@ from xkcd_image import xkcd_random_image
 from todo_image import todo_fermeture_chalet
 from random_image_from_dropbox import random_image_from_dropbox
 from nhl_classification import make_nhl_standings_image
+from nhl_playoff_bracket import make_nhl_playoff_image
 from moon_phase import generate_moon_phase_image
 from music_charts import generate_music_charts_image
 from generate_produce_codes import generate_produce_codes_image
@@ -54,13 +55,36 @@ def shutdown_display() -> str:
     """Function that does nothing but output shutdown instruction"""
     return "shutdown"
 
+def nhl_standings_or_playoffs() -> Optional[str]:
+    """Show playoff bracket during active playoffs, standings otherwise.
+
+    Checks the NHL API for an active bracket (any series with no winner yet).
+    Falls back to standings if the API is unreachable or playoffs are over.
+    """
+    import requests as _requests
+    try:
+        year = datetime.now(EASTERN_TZ).year
+        r = _requests.get(f"https://api-web.nhle.com/v1/playoff-bracket/{year}", timeout=10)
+        if r.ok:
+            series = r.json().get('series', [])
+            playoffs_active = series and any(
+                s.get('topSeedWins', 0) < 4 and s.get('bottomSeedWins', 0) < 4
+                for s in series
+            )
+            if playoffs_active:
+                logging.info("NHL playoffs active — showing bracket")
+                return make_nhl_playoff_image()
+    except Exception as e:
+        logging.warning(f"NHL playoff check failed: {e}")
+    return make_nhl_standings_image()
+
 # repeat functions to increase their chance of being randomly choosen
 repeated_random_imgs = [random_image_from_dropbox]*6
 
 # List of available display functions for random selection
 DISPLAY_FUNCTIONS_TO_RUN_RANDOMLY = [xkcd_random_image,
                                      *repeated_random_imgs,
-                                     make_nhl_standings_image,
+                                     nhl_standings_or_playoffs,
                                      generate_moon_phase_image,
                                      generate_music_charts_image,
                                      generate_produce_codes_image,
@@ -77,6 +101,8 @@ FUNCTION_MAP = {
     "todo_fermeture_chalet": todo_fermeture_chalet,
     "random_image_from_dropbox": random_image_from_dropbox,
     "make_nhl_standings_image": make_nhl_standings_image,
+    "make_nhl_playoff_image": make_nhl_playoff_image,
+    "nhl_standings_or_playoffs": nhl_standings_or_playoffs,
     "generate_moon_phase_image": generate_moon_phase_image,
     "generate_music_charts_image": generate_music_charts_image,
     "generate_produce_codes_image": generate_produce_codes_image,
