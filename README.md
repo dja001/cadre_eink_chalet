@@ -187,7 +187,7 @@ crontab -e
 Add:
 
 ```
-24 1,7,13,19 * * * cd /home/pilist/eink_scheduler && /home/pilist/miniforge3/envs/eink_display_env/bin/python3 hrdps_fetch.py >> hrdps_data/fetch.log 2>&1
+24 1,7,13,19 * * * cd /home/pilist/eink_scheduler && /home/pilist/miniforge3/envs/eink_display_env/bin/python3 src/hrdps_fetch.py >> hrdps_data/fetch.log 2>&1
 ```
 
 The Waveshare EPD library (`epd13in3E`) must be installed separately. Set the `EPD_LIB` path at the top of `eink_driver.py` to point to the `lib/` directory of your local [e-Paper](https://github.com/waveshare/e-Paper) checkout.
