@@ -8,7 +8,7 @@ Generates a 1200×1600 PNG with four panels:
   3. Wind speed (km/h)  — gray spaghetti lines + blue observed
   4. Wind barbs         — thin strip showing direction from newest HRDPS run
 
-- X axis:  now−48h  →  now+12h  (60-hour window)
+- X axis:  now−48h  →  now+48h  (96-hour window), relative labels every 12 h
 - Each HRDPS run = one gray line; older = lighter, newest = near-black
 - Blue = observed data from the nearest Environment Canada weather station
 - Red dashed vertical line marks current time
@@ -58,7 +58,7 @@ HEIGHT_PX = 1600
 DPI = 100  # → 12 × 16 inch figure
 
 HOURS_PAST   = 48
-HOURS_FUTURE = 24
+HOURS_FUTURE = 48
 
 VAR_TEMP   = "temperature_c"
 VAR_PRECIP = "precip_mm"
@@ -224,6 +224,23 @@ def _swob_float(obs: dict, key: str) -> float | None:
         return None
 
 
+def _swob_wind_kmh(obs: dict, key: str) -> float | None:
+    """Read wind speed from a SWOB obs and return km/h, converting from knots or m/s if needed."""
+    entry = obs.get(key)
+    if entry is None:
+        return None
+    try:
+        value = float(entry[0])
+        uom = entry[1].lower().strip()
+    except (ValueError, TypeError, IndexError):
+        return None
+    if "kt" in uom or "knot" in uom:
+        return value * 1.852
+    if uom in ("m/s", "m s-1", "ms-1"):
+        return value * 3.6
+    return value  # assume km/h
+
+
 def load_station_obs(hours_past: int = HOURS_PAST) -> dict:
     """
     Fetch hourly SWOB-ML observations from the nearest EC station (OBS_TC_ID)
@@ -272,7 +289,7 @@ def load_station_obs(hours_past: int = HOURS_PAST) -> dict:
         if precip is not None:
             result["precip"].append((dt_utc, max(0.0, precip)))
 
-        spd_kmh = _swob_float(obs, "avg_wnd_spd_10m_pst1hr")
+        spd_kmh = _swob_wind_kmh(obs, "avg_wnd_spd_10m_pst1hr")
         wdir    = _swob_float(obs, "avg_wnd_dir_10m_pst1hr")
         if spd_kmh is not None:
             result["wind"].append((dt_utc, spd_kmh))
@@ -475,7 +492,7 @@ def generate_hrdps_image(output_dir: str = "./figures", fetch: bool = False) -> 
 
     ax_barbs.set_ylim(0, 1)
     ax_barbs.set_yticks([])
-    ax_barbs.set_ylabel("Dir.", fontsize=FS_LABEL - 4, labelpad=2)
+    ax_barbs.set_title("Wind Direction", fontsize=FS_PANEL, loc="left", pad=6)
 
     # ── 6. Axes formatting ───────────────────────────────────────────────────
     now_label = now.astimezone(EASTERN).strftime("%Y-%m-%d %H:%M %Z")
@@ -501,17 +518,24 @@ def generate_hrdps_image(output_dir: str = "./figures", fetch: bool = False) -> 
     ax_barbs.axvline(now, color="red", linewidth=2.0, linestyle="--", zorder=10)
     ax_barbs.set_xlim(window_start, window_end)
 
-    # X-axis: hour labels every 6h; show "day Mon" only at midnight
-    def _x_fmt(x, pos):
-        dt = mdates.num2date(x).replace(tzinfo=UTC)
-        if dt.hour == 0:
-            return f"00Z\n{dt.day} {dt.strftime('%b')}"
-        return f"{dt.hour:02d}Z"
-
+    # X-axis: relative labels every 12 h centred on "Now"
     import matplotlib.ticker as mticker
-    ax_barbs.xaxis.set_major_locator(mdates.HourLocator(byhour=[0, 6, 12, 18]))
-    ax_barbs.xaxis.set_major_formatter(mticker.FuncFormatter(_x_fmt))
-    ax_barbs.set_xlabel("UTC", fontsize=FS_LABEL)
+
+    tick_offsets_h = range(-HOURS_PAST, HOURS_FUTURE + 1, 12)
+    tick_times = [now + timedelta(hours=h) for h in tick_offsets_h]
+
+    def _x_fmt_rel(x, pos):
+        dt = mdates.num2date(x).replace(tzinfo=UTC)
+        delta_h = round((dt - now).total_seconds() / 3600)
+        if delta_h == 0:
+            return "Now"
+        return f"+{delta_h}h" if delta_h > 0 else f"{delta_h}h"
+
+    ax_barbs.xaxis.set_major_locator(
+        mticker.FixedLocator([mdates.date2num(t) for t in tick_times])
+    )
+    ax_barbs.xaxis.set_major_formatter(mticker.FuncFormatter(_x_fmt_rel))
+    ax_barbs.set_xlabel("", fontsize=FS_LABEL)
     ax_barbs.tick_params(axis="x", labelsize=FS_TICK, pad=12)
 
     # ── 7. Legend ─────────────────────────────────────────────────────────────
